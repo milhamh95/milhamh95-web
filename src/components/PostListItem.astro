@@ -1,0 +1,39 @@
+---
+// Look adapted from reference/astrowind/src/components/blog/ListItem.astro:
+// image left (when present) + text right, falls back to text-only cleanly.
+import { Image } from "astro:assets";
+import { formatDate } from "../lib/posts";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, tags, heroImage } = post.data;
+const href = `/blog/${post.id}`;
+---
+
+<article class:list={["grid gap-4", heroImage && "sm:grid-cols-[10rem_1fr]"]}>
+  {heroImage && (
+    <a href={href} class="block overflow-hidden rounded-lg bg-surface0">
+      <Image src={heroImage} alt="" width={320} height={200} class="h-full w-full object-cover" />
+    </a>
+  )}
+  <div>
+    <p class="text-xs text-subtext0">{formatDate(pubDate)}</p>
+    <h2 class="mt-1 text-lg font-semibold text-text">
+      <a href={href} class="hover:text-accent">{title}</a>
+    </h2>
+    <p class="mt-1 text-sm text-subtext0">{description}</p>
+    {tags.length > 0 && (
+      <div class="mt-2 flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <a href={`/tags/${tag}`} class="rounded-full bg-surface0 px-2.5 py-0.5 text-xs text-subtext1 hover:text-accent">
+            #{tag}
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</article>

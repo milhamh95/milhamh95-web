@@ -1,0 +1,79 @@
+---
+// Structure adapted from reference/astrowind/src/components/widgets/Header.astro,
+// simplified (no dropdowns, no persisted state) and re-colored to the site's tokens.
+import ThemeToggle from "./ThemeToggle.astro";
+
+const links = [
+  { text: "Home", href: "/" },
+  { text: "Blog", href: "/blog" },
+  { text: "Tags", href: "/tags" },
+  { text: "About", href: "/about" },
+  // Only in `npm run dev` — the /drafts page itself 404s in production, this
+  // just keeps it from being a dead link in the built nav.
+  ...(import.meta.env.DEV ? [{ text: "Drafts", href: "/drafts" }] : []),
+];
+
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (href: string) => (href === "/" ? currentPath === "/" : currentPath.startsWith(href));
+---
+
+<header class="sticky top-0 z-40 border-b border-surface0 bg-base/90 backdrop-blur">
+  <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
+    <a href="/" class="text-lg font-semibold text-text">milhamh</a>
+
+    <nav aria-label="Main navigation" class="hidden items-center gap-1 sm:flex">
+      {links.map(({ text, href }) => (
+        <a
+          href={href}
+          class:list={[
+            "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+            isActive(href) ? "text-accent" : "text-subtext0 hover:text-text",
+          ]}
+        >
+          {text}
+        </a>
+      ))}
+      <ThemeToggle />
+    </nav>
+
+    <div class="flex items-center gap-1 sm:hidden">
+      <ThemeToggle />
+      <button
+        id="menu-toggle"
+        type="button"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        class="rounded-md p-2 text-subtext0 hover:bg-surface0 hover:text-text"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-menu" aria-label="Mobile navigation" class="hidden flex-col border-t border-surface0 px-4 py-2 sm:hidden">
+    {links.map(({ text, href }) => (
+      <a
+        href={href}
+        class:list={[
+          "rounded-md px-3 py-2 text-sm font-medium",
+          isActive(href) ? "text-accent" : "text-subtext0 hover:text-text",
+        ]}
+      >
+        {text}
+      </a>
+    ))}
+  </nav>
+</header>
+
+<script is:inline>
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  menuToggle?.addEventListener('click', () => {
+    const isOpen = mobileMenu?.classList.toggle('flex');
+    mobileMenu?.classList.toggle('hidden');
+    menuToggle.setAttribute('aria-expanded', String(!!isOpen));
+  });
+</script>

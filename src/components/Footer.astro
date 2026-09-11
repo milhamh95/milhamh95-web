@@ -1,0 +1,34 @@
+---
+// Structure adapted from reference/astrowind/src/components/widgets/Footer.astro,
+// simplified and re-colored to the site's tokens.
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-surface0">
+  <div class="mx-auto flex max-w-3xl flex-col items-center gap-4 px-4 py-8 sm:flex-row sm:justify-between">
+    <p class="text-sm text-subtext0">&copy; {year} Muhammad Ilham Hidayat</p>
+
+    <div class="flex items-center gap-1">
+      <a
+        href="/rss.xml"
+        aria-label="RSS feed"
+        class="rounded-md p-2 text-subtext0 hover:bg-surface0 hover:text-text"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5">
+          <path d="M4 11a9 9 0 0 1 9 9" /><path d="M4 4a16 16 0 0 1 16 16" /><circle cx="5" cy="19" r="1" />
+        </svg>
+      </a>
+      <a
+        href="https://github.com/milhamh95"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="GitHub"
+        class="rounded-md p-2 text-subtext0 hover:bg-surface0 hover:text-text"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+          <path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.5 2.87 8.32 6.84 9.67.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.49-1.11-1.49-.91-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.55 2.34 1.1 2.91.84.09-.66.35-1.1.63-1.36-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.35c.85 0 1.71.12 2.5.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.8-4.57 5.06.36.32.68.95.68 1.92 0 1.39-.01 2.51-.01 2.85 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.2C22 6.58 17.52 2 12 2Z" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</footer>

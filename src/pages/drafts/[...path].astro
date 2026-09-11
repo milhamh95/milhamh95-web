@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { formatDate } from "../../lib/posts";
+
+// A [...rest] route with zero returned paths builds zero files for the whole
+// route — the same guarantee blog/[slug].astro relies on for hidden drafts.
+// (A plain Response(404) from a static page's frontmatter does NOT do this:
+// Astro still writes an HTML file to disk, just with 404-looking *content*,
+// served at a real 200 — not an actual 404. Tried that first; it was wrong.)
+export async function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  return [{ params: { path: undefined } }];
+}
+
+const drafts = (await getCollection("blog", ({ data }) => data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<Layout title="Drafts (dev only) | milhamh.com">
+  <section class="mx-auto max-w-2xl px-4 py-16">
+    <h1 class="text-2xl font-semibold text-text">Drafts</h1>
+    <p class="mt-2 text-sm text-subtext0">
+      Only visible in <code>npm run dev</code>. Never built for production.
+    </p>
+
+    <div class="mt-8 flex flex-col gap-4">
+      {drafts.length === 0 && <p class="text-subtext0">No drafts.</p>}
+      {drafts.map((post) => (
+        <a
+          href={`/blog/${post.id}`}
+          class="block rounded-lg border border-surface0 p-4 transition-colors hover:border-accent"
+        >
+          <p class="text-xs text-subtext0">{formatDate(post.data.pubDate)}</p>
+          <h2 class="mt-1 font-semibold text-text">{post.data.title}</h2>
+          <p class="mt-1 text-sm text-subtext0">{post.data.description}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Layout>

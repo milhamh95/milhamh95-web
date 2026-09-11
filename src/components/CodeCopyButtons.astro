@@ -1,0 +1,39 @@
+{/* Adds a copy button to every Shiki code block (`.prose pre`). Rendered once in
+   Layout.astro — unlike ThemeToggle, this never appears twice on one page, so no
+   double-binding guard is needed. Icons/colors are fixed Mocha, matching the code
+   block itself, which is always Mocha regardless of site mode. */}
+<script is:inline>
+  document.querySelectorAll('.prose pre').forEach((pre) => {
+    if (pre.querySelector('.copy-code-button')) return;
+
+    const copyIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>';
+    const checkIcon =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M20 6 9 17l-5-5" /></svg>';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'copy-code-button';
+    button.setAttribute('aria-label', 'Copy code');
+    button.innerHTML = copyIcon;
+
+    let resetTimer;
+    button.addEventListener('click', async () => {
+      const code = pre.querySelector('code')?.innerText ?? pre.innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+        button.innerHTML = checkIcon;
+        button.setAttribute('aria-label', 'Copied');
+      } catch {
+        button.setAttribute('aria-label', 'Copy failed');
+      }
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        button.innerHTML = copyIcon;
+        button.setAttribute('aria-label', 'Copy code');
+      }, 1500);
+    });
+
+    pre.appendChild(button);
+  });
+</script>

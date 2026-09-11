@@ -1,0 +1,180 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* .dark class on <html> switches the palette; see inline script in Layout.astro */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Catppuccin Latte — https://catppuccin.com/palette/#flavor-latte */
+:root {
+  --ctp-rosewater: #dc8a78;
+  --ctp-flamingo: #dd7878;
+  --ctp-pink: #ea76cb;
+  --ctp-mauve: #8839ef;
+  --ctp-red: #d20f39;
+  --ctp-maroon: #e64553;
+  --ctp-peach: #fe640b;
+  --ctp-yellow: #df8e1d;
+  --ctp-green: #40a02b;
+  --ctp-teal: #179299;
+  --ctp-sky: #04a5e5;
+  --ctp-sapphire: #209fb5;
+  --ctp-blue: #1e66f5;
+  --ctp-lavender: #7287fd;
+  --ctp-text: #4c4f69;
+  --ctp-subtext1: #5c5f77;
+  --ctp-subtext0: #6c6f85;
+  --ctp-overlay2: #7c7f93;
+  --ctp-overlay1: #8c8fa1;
+  --ctp-overlay0: #9ca0b0;
+  --ctp-surface2: #acb0be;
+  --ctp-surface1: #bcc0cc;
+  --ctp-surface0: #ccd0da;
+  --ctp-base: #eff1f5;
+  --ctp-mantle: #e6e9ef;
+  --ctp-crust: #dce0e8;
+}
+
+/* Catppuccin Mocha — https://catppuccin.com/palette/#flavor-mocha */
+.dark {
+  --ctp-rosewater: #f5e0dc;
+  --ctp-flamingo: #f2cdcd;
+  --ctp-pink: #f5c2e7;
+  --ctp-mauve: #cba6f7;
+  --ctp-red: #f38ba8;
+  --ctp-maroon: #eba0ac;
+  --ctp-peach: #fab387;
+  --ctp-yellow: #f9e2af;
+  --ctp-green: #a6e3a1;
+  --ctp-teal: #94e2d5;
+  --ctp-sky: #89dceb;
+  --ctp-sapphire: #74c7ec;
+  --ctp-blue: #89b4fa;
+  --ctp-lavender: #b4befe;
+  --ctp-text: #cdd6f4;
+  --ctp-subtext1: #bac2de;
+  --ctp-subtext0: #a6adc8;
+  --ctp-overlay2: #9399b2;
+  --ctp-overlay1: #7f849c;
+  --ctp-overlay0: #6c7086;
+  --ctp-surface2: #585b70;
+  --ctp-surface1: #45475a;
+  --ctp-surface0: #313244;
+  --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825;
+  --ctp-crust: #11111b;
+}
+
+@theme {
+  --color-rosewater: var(--ctp-rosewater);
+  --color-flamingo: var(--ctp-flamingo);
+  --color-pink: var(--ctp-pink);
+  --color-mauve: var(--ctp-mauve);
+  --color-red: var(--ctp-red);
+  --color-maroon: var(--ctp-maroon);
+  --color-peach: var(--ctp-peach);
+  --color-yellow: var(--ctp-yellow);
+  --color-green: var(--ctp-green);
+  --color-teal: var(--ctp-teal);
+  --color-sky: var(--ctp-sky);
+  --color-sapphire: var(--ctp-sapphire);
+  --color-blue: var(--ctp-blue);
+  --color-lavender: var(--ctp-lavender);
+  --color-text: var(--ctp-text);
+  --color-subtext1: var(--ctp-subtext1);
+  --color-subtext0: var(--ctp-subtext0);
+  --color-overlay2: var(--ctp-overlay2);
+  --color-overlay1: var(--ctp-overlay1);
+  --color-overlay0: var(--ctp-overlay0);
+  --color-surface2: var(--ctp-surface2);
+  --color-surface1: var(--ctp-surface1);
+  --color-surface0: var(--ctp-surface0);
+  --color-base: var(--ctp-base);
+  --color-mantle: var(--ctp-mantle);
+  --color-crust: var(--ctp-crust);
+
+  /* Semantic alias: change this one line to swap the site accent later. */
+  --color-accent: var(--ctp-mauve);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-base text-text font-sans;
+}
+
+/* Prose (About page, blog posts) follows the same tokens, so no dark:prose-invert needed —
+   --color-* already swaps with the .dark class. */
+.prose {
+  --tw-prose-body: var(--color-subtext0);
+  --tw-prose-headings: var(--color-text);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-text);
+  --tw-prose-counters: var(--color-subtext0);
+  --tw-prose-bullets: var(--color-overlay0);
+  --tw-prose-hr: var(--color-surface0);
+  --tw-prose-quotes: var(--color-text);
+  --tw-prose-quote-borders: var(--color-surface1);
+  --tw-prose-captions: var(--color-subtext0);
+  --tw-prose-code: var(--color-text);
+  --tw-prose-pre-code: var(--color-text);
+  --tw-prose-pre-bg: var(--color-mantle);
+  --tw-prose-th-borders: var(--color-surface0);
+  --tw-prose-td-borders: var(--color-surface0);
+}
+
+/* Shiki sets its own background-color as an inline style (always Mocha's base,
+   #1e1e2e), which is identical to the page background in dark mode — the code
+   block became invisible. Override with a fixed, always-Mocha crust background
+   + border so it reads as a distinct block in both site modes. */
+.prose pre {
+  position: relative;
+  background-color: #11111b !important; /* ctp-mocha crust */
+  border: 1px solid #313244; /* ctp-mocha surface0 */
+  border-radius: 0.5rem;
+}
+
+/* Injected by CodeCopyButtons.astro. Fixed Mocha colors, same reasoning as the
+   code block itself: it always sits on a Mocha background, in both site modes. */
+.copy-code-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  border-radius: 0.375rem;
+  background-color: #313244; /* ctp-mocha surface0 */
+  color: #bac2de; /* ctp-mocha subtext1 */
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+}
+.prose pre:hover .copy-code-button,
+.copy-code-button:focus-visible {
+  opacity: 1;
+}
+.copy-code-button:hover {
+  background-color: #45475a; /* ctp-mocha surface1 */
+  color: #cdd6f4; /* ctp-mocha text */
+}
+
+/* Line numbers: Shiki already wraps each line in <span class="line">, so a CSS
+   counter is enough — no line-numbers transformer/plugin needed. */
+.prose pre code {
+  counter-reset: line;
+}
+.prose pre .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  position: sticky;
+  left: 0;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  background-color: #11111b; /* ctp-mocha crust, matches pre bg: masks the code scrolling under it */
+  color: #6c7086; /* ctp-mocha overlay0 */
+  user-select: none;
+}
