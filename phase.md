@@ -41,9 +41,11 @@ Tracks progress on [plan.md](./plan.md). One phase at a time, checked before mov
 Verified: `npm run build` succeeds, all routes return 200, screenshots checked in both light
 and dark mode (home, blog list, post page) — colors, toggle, and code block theme all correct.
 
-## Phase 5 — Deploy ⬜ not started
+## Phase 5 — Deploy 🟡 in progress
 
-- [ ] Cloudflare Worker (static assets) set up
-- [ ] Git integration: push to `main` deploys, branches get previews
-- [ ] Add `milhamh.com` to Cloudflare, point Namecheap nameservers
+- [x] `wrangler.jsonc` (static assets, `./dist`) + `404.astro` added
+- [x] Cloudflare Worker set up, repo connected, Git integration live — push to `main` deploys
+- [x] Live at `*.workers.dev`
+- [ ] Add `milhamh.com` to Cloudflare, point Namecheap nameservers (deferred — do whenever)
 - [ ] Attach domain + `www` redirect to the Worker
+- [ ] Update `astro.config.mjs` `site` if the final domain differs from `milhamh.com`
