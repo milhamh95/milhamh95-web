@@ -1,0 +1,23 @@
+---
+type Props = {
+  type?: "info" | "success" | "warning" | "danger";
+};
+
+const { type = "info" } = Astro.props;
+
+const VARIANTS = {
+  info: { border: "border-blue", bg: "bg-blue/10", label: "Note" },
+  success: { border: "border-green", bg: "bg-green/10", label: "Success" },
+  warning: { border: "border-yellow", bg: "bg-yellow/10", label: "Warning" },
+  danger: { border: "border-red", bg: "bg-red/10", label: "Danger" },
+} as const;
+
+const { border, bg, label } = VARIANTS[type];
+---
+
+<div class:list={["border-l-4 rounded-r-md px-4 py-3", border, bg]}>
+  <p class="font-semibold text-text">{label}</p>
+  <div class="mt-1 text-subtext0">
+    <slot />
+  </div>
+</div>

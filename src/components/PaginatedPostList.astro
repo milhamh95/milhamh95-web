@@ -1,0 +1,27 @@
+---
+import type { Page } from "astro";
+import type { CollectionEntry } from "astro:content";
+import PostListItem from "./PostListItem.astro";
+
+interface Props {
+  page: Page<CollectionEntry<"blog">>;
+}
+
+const { page } = Astro.props;
+---
+
+<div id="post-list" class="mt-8 flex flex-col gap-12 sm:gap-16">
+  {page.data.map((post) => <PostListItem post={post} />)}
+</div>
+
+{page.lastPage > 1 && (
+  <nav id="pagination" aria-label="Pagination" class="mt-10 flex items-center justify-between">
+    {page.url.prev ? (
+      <a href={page.url.prev} class="text-accent hover:underline">&larr; Newer</a>
+    ) : <span />}
+    <span class="text-subtext0">Page {page.currentPage} of {page.lastPage}</span>
+    {page.url.next ? (
+      <a href={page.url.next} class="text-accent hover:underline">Older &rarr;</a>
+    ) : <span />}
+  </nav>
+)}

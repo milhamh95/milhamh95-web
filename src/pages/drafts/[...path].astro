@@ -19,9 +19,9 @@ const drafts = (await getCollection("blog", ({ data }) => data.draft)).sort(
 ---
 
 <Layout title="Drafts (dev only) | milhamh.com">
-  <section class="mx-auto max-w-2xl px-4 py-16">
-    <h1 class="text-2xl font-semibold text-text">Drafts</h1>
-    <p class="mt-2 text-sm text-subtext0">
+  <section class="mx-auto w-full max-w-5xl px-4 py-16">
+    <h1 class="text-3xl font-semibold text-text">Drafts</h1>
+    <p class="mt-2 text-subtext0">
       Only visible in <code>npm run dev</code>. Never built for production.
     </p>
 
@@ -32,9 +32,9 @@ const drafts = (await getCollection("blog", ({ data }) => data.draft)).sort(
           href={`/blog/${post.id}`}
           class="block rounded-lg border border-surface0 p-4 transition-colors hover:border-accent"
         >
-          <p class="text-xs text-subtext0">{formatDate(post.data.pubDate)}</p>
-          <h2 class="mt-1 font-semibold text-text">{post.data.title}</h2>
-          <p class="mt-1 text-sm text-subtext0">{post.data.description}</p>
+          <p class="text-sm text-subtext0">{formatDate(post.data.pubDate)}</p>
+          <h2 class="mt-1 text-xl lg:text-2xl font-semibold text-text">{post.data.title}</h2>
+          <p class="mt-1 text-subtext0 lg:text-lg">{post.data.description}</p>
         </a>
       ))}
     </div>

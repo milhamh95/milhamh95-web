@@ -1,35 +1,24 @@
 ---
 import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
-import PostListItem from "../../components/PostListItem.astro";
+import PaginatedPostList from "../../components/PaginatedPostList.astro";
+import PostSearch from "../../components/PostSearch.astro";
 import { getPublishedPosts } from "../../lib/posts";
 
 export const getStaticPaths = (async ({ paginate }) => {
+  const pageSize = 5;
+  const maxPages = 6;
   const posts = await getPublishedPosts();
-  return paginate(posts, { pageSize: 10 });
+  return paginate(posts.slice(0, pageSize * maxPages), { pageSize });
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;
 ---
 
 <Layout title="Blog | milhamh.com" description="All posts.">
-  <section class="mx-auto max-w-2xl px-4 py-16">
-    <h1 class="text-2xl font-semibold text-text">Blog</h1>
-
-    <div class="mt-8 flex flex-col gap-8">
-      {page.data.map((post) => <PostListItem post={post} />)}
-    </div>
-
-    {page.lastPage > 1 && (
-      <nav aria-label="Pagination" class="mt-10 flex items-center justify-between text-sm">
-        {page.url.prev ? (
-          <a href={page.url.prev} class="text-accent hover:underline">&larr; Newer</a>
-        ) : <span />}
-        <span class="text-subtext0">Page {page.currentPage} of {page.lastPage}</span>
-        {page.url.next ? (
-          <a href={page.url.next} class="text-accent hover:underline">Older &rarr;</a>
-        ) : <span />}
-      </nav>
-    )}
+  <section class="mx-auto w-full max-w-5xl px-4 py-16">
+    <h1 class="text-3xl font-semibold text-text">Blog</h1>
+    <PostSearch />
+    <PaginatedPostList page={page} />
   </section>
 </Layout>

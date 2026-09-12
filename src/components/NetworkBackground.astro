@@ -1,0 +1,83 @@
+{/* Decorative node network, pinned to the viewport behind the whole page
+   (header/footer included), regardless of where this component is placed in
+   the DOM. Fixed Mocha palette regardless of site light/dark mode — same
+   reasoning as code blocks: it's a texture, not content, so it doesn't need
+   to swap. Static (redrawn only on resize, not animated) to keep it cheap. */}
+<canvas id="network-bg" class="fixed inset-0 -z-10 h-full w-full" aria-hidden="true"></canvas>
+
+<script>
+  const DOT_COLORS = ["#89b4fa", "#cba6f7", "#f5c2e7", "#94e2d5", "#b4befe"];
+  const LINE_COLOR = "#6c7086";
+  const MAX_DIST = 140;
+  const AREA_PER_POINT = 9000;
+
+  const canvas = document.getElementById("network-bg") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  // Fixed seed: the network looks the same on every reload at a given size
+  // instead of reshuffling randomly — a stable design, not noise.
+  function mulberry32(seed: number) {
+    return () => {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function draw() {
+    const random = mulberry32(42);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const count = Math.round((width * height) / AREA_PER_POINT);
+    const points = Array.from({ length: count }, () => ({
+      x: random() * width,
+      y: random() * height,
+    }));
+
+    ctx.strokeStyle = LINE_COLOR;
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const dist = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y);
+        if (dist >= MAX_DIST) continue;
+        ctx.globalAlpha = 0.15 * (1 - dist / MAX_DIST);
+        ctx.beginPath();
+        ctx.moveTo(points[i].x, points[i].y);
+        ctx.lineTo(points[j].x, points[j].y);
+        ctx.stroke();
+      }
+    }
+
+    ctx.globalAlpha = 0.7;
+    points.forEach((p, i) => {
+      ctx.fillStyle = DOT_COLORS[i % DOT_COLORS.length];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  draw();
+
+  // The layout can still shift after this first draw — most notably the
+  // self-hosted Inter font finishing its load and reflowing the hero text —
+  // leaving the canvas's fixed pixel size a beat behind the section's real
+  // height. Redraw once fonts settle to close that gap.
+  document.fonts?.ready.then(draw);
+
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(draw, 150);
+  });
+</script>

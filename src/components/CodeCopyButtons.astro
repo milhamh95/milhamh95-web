@@ -3,7 +3,7 @@
    double-binding guard is needed. Icons/colors are fixed Mocha, matching the code
    block itself, which is always Mocha regardless of site mode. */}
 <script is:inline>
-  document.querySelectorAll('.prose pre').forEach((pre) => {
+  document.querySelectorAll('.prose pre:not(.mermaid)').forEach((pre) => {
     if (pre.querySelector('.copy-code-button')) return;
 
     const copyIcon =

@@ -28,7 +28,21 @@ script in `src/layouts/Layout.astro`). No flash on load.
 Font: [Inter Variable](https://fontsource.org/fonts/inter), self-hosted via
 `@fontsource-variable/inter`. No Google Fonts network call.
 
+Sizes (16px base, nothing below 14px):
+
+- Post body / About: `prose` (16px)
+- Post title `text-4xl`, page titles `text-3xl`, post list titles + logo `text-xl`
+- Summaries, nav links, footer: no size class (inherits 16px). Never write `text-base` — it
+  compiles to the Catppuccin `base` color (the page background), not 16px, and hides the text
+- Dates, tag pills: `text-sm` (smallest size on the site)
+
+Paragraphs in `.prose` (post body, About) are justified with `hyphens: auto`, set in
+`global.css` — no per-page class needed.
+
 ## Layout
+
+Header and footer sit on `bg-mantle` (one shade darker than the `base` page, in both
+flavors) plus a `surface0` border, so they read as separate without a loud color.
 
 Reading-focused, single-column. Content is capped at a comfortable line length
 (`max-w-2xl`/`max-w-3xl`), generous vertical spacing, minimal chrome.

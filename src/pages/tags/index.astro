@@ -13,13 +13,13 @@ const tags = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 ---
 
 <Layout title="Tags | milhamh.com" description="Posts by tag.">
-  <section class="mx-auto max-w-2xl px-4 py-16">
-    <h1 class="text-2xl font-semibold text-text">Tags</h1>
+  <section class="mx-auto w-full max-w-5xl px-4 py-16">
+    <h1 class="text-3xl font-semibold text-text">Tags</h1>
     <div class="mt-6 flex flex-wrap gap-2">
       {tags.map(([tag, count]) => (
         <a
           href={`/tags/${tag}`}
-          class="rounded-full bg-surface0 px-3 py-1 text-sm text-subtext1 hover:text-accent"
+          class="rounded-full bg-crust dark:bg-surface0 px-3 py-1 text-subtext1 lg:text-lg hover:text-accent"
         >
           #{tag} <span class="text-subtext0">({count})</span>
         </a>

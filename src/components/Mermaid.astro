@@ -1,0 +1,110 @@
+{/* Renders every <pre class="mermaid"> (produced by the remarkMermaid plugin in
+   astro.config.mjs) into an SVG diagram. Mermaid computes derived shades (lighten/
+   darken) from themeVariables at render time, so it needs real hex values, not
+   var(--ctp-*) strings — it throws "Unsupported color format" otherwise. That means
+   a theme switch needs a re-render, not just CSS: a MutationObserver on <html class>
+   redraws every diagram from its original source (saved in a data attribute, since
+   the first render replaces the element's text with SVG) whenever dark mode toggles.
+   Palette is blue/peach/sky, checked with a protanopia/deuteranopia/tritanopia
+   simulation (Machado et al. matrices) in both flavors — mauve was tried first but
+   simulates too close to blue under red-green color blindness. Named palettes
+   (IBM, Okabe-Ito) were tried too: both are calibrated for a plain white/black
+   page, so on this site's gray card surfaces they either fail contrast (light
+   mode) or lose CVD-distinguishability once lightened for dark mode — worse than
+   just using Catppuccin's own matched light/dark hues.
+   Latte fills are the accent hues blended toward the page background — full
+   saturation read as too bright/mismatched against the rest of the (soft,
+   pastel-leaning) site. The border keeps the full-saturation hue so the node
+   still pops. Text color is per-swatch, not uniform: white text was requested,
+   but only blue is dark enough to support it (a barely-there 3% tint keeps
+   white text just above 4.5:1) — peach and sky fail white text at ANY tint,
+   even full saturation (2.8–3.0:1), because Catppuccin's Latte peach/sky are
+   just too light. Those two keep the 25%-tint + black text from before; making
+   them dark enough for white text would mean drifting off the actual Catppuccin
+   hue, which isn't worth it for swatches no current post even uses yet. Mocha is
+   untouched: its hues are pastel already, black text already passed there. */}
+<script>
+  import mermaid from 'mermaid';
+
+  const LATTE = {
+    background: '#e6e9ef', // mantle
+    primaryColor: '#246af5', // blue, barely tinted — dark enough for white text
+    primaryTextColor: '#ffffff',
+    primaryBorderColor: '#1e66f5', // full-saturation blue, for definition
+    secondaryColor: '#fa8746', // peach, 25% toward page bg
+    secondaryTextColor: '#11111b',
+    secondaryBorderColor: '#fe640b',
+    tertiaryColor: '#3fb8e9', // sky, 25% toward page bg
+    tertiaryTextColor: '#11111b',
+    tertiaryBorderColor: '#04a5e5',
+    lineColor: '#9ca0b0', // overlay0
+    textColor: '#4c4f69', // text
+    mainBkg: '#246af5',
+    nodeTextColor: '#ffffff',
+    clusterBkg: '#ccd0da', // surface0
+    clusterBorder: '#9ca0b0',
+    edgeLabelBackground: '#e6e9ef',
+    actorBkg: '#246af5',
+    actorTextColor: '#ffffff',
+    actorBorder: '#1e66f5',
+    signalColor: '#9ca0b0',
+    signalTextColor: '#4c4f69',
+    labelBoxBkgColor: '#fa8746',
+    labelTextColor: '#11111b',
+    noteBkgColor: '#3fb8e9',
+    noteTextColor: '#11111b'
+  };
+
+  const MOCHA = {
+    background: '#181825',
+    primaryColor: '#89b4fa',
+    primaryTextColor: '#11111b',
+    primaryBorderColor: '#89b4fa',
+    secondaryColor: '#fab387',
+    secondaryTextColor: '#11111b',
+    secondaryBorderColor: '#fab387',
+    tertiaryColor: '#89dceb', // sky
+    tertiaryTextColor: '#11111b',
+    tertiaryBorderColor: '#89dceb',
+    lineColor: '#6c7086',
+    textColor: '#cdd6f4',
+    mainBkg: '#89b4fa',
+    nodeTextColor: '#11111b',
+    clusterBkg: '#313244',
+    clusterBorder: '#6c7086',
+    edgeLabelBackground: '#181825',
+    actorBkg: '#89b4fa',
+    actorTextColor: '#11111b',
+    actorBorder: '#89b4fa',
+    signalColor: '#6c7086',
+    signalTextColor: '#cdd6f4',
+    labelBoxBkgColor: '#fab387',
+    labelTextColor: '#11111b',
+    noteBkgColor: '#89dceb',
+    noteTextColor: '#11111b'
+  };
+
+  const isDark = () => document.documentElement.classList.contains('dark');
+
+  async function renderAll() {
+    mermaid.initialize({ startOnLoad: false, theme: 'base', themeVariables: isDark() ? MOCHA : LATTE });
+
+    const blocks = document.querySelectorAll<HTMLElement>('pre.mermaid');
+    for (const [i, block] of blocks.entries()) {
+      block.dataset.mermaidSource ??= block.textContent ?? '';
+      try {
+        const { svg } = await mermaid.render(`mermaid-${i}-${isDark() ? 'dark' : 'light'}`, block.dataset.mermaidSource);
+        block.innerHTML = svg;
+      } catch (err) {
+        console.error('Mermaid render failed:', err);
+      }
+    }
+  }
+
+  renderAll();
+
+  new MutationObserver(renderAll).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  });
+</script>

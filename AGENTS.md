@@ -35,3 +35,5 @@ system — read DESIGN.md before touching any styling.
 - Don't wire up analytics, comments, search, or a second language — explicitly deferred, see
   plan.md.
 - Don't add a UI framework (React/Vue/etc.) for a static blog.
+- Don't use `text-base` for 16px. The Catppuccin `base` token turns it into the background
+  color, so text vanishes. 16px is the default — just omit the size class.

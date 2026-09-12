@@ -2,6 +2,7 @@
 title: "Second draft example"
 description: "Proving the /drafts list handles more than one."
 pubDate: 2026-09-21
+category: "tech"
 tags: ["meta"]
 draft: true
 ---

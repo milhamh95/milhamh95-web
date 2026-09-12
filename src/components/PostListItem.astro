@@ -1,6 +1,7 @@
 ---
 // Look adapted from reference/astrowind/src/components/blog/ListItem.astro:
-// image left (when present) + text right, falls back to text-only cleanly.
+// image left (when present), text right, roughly 50/50 like AstroWind's own
+// desktop list. Falls back to text-only cleanly.
 import { Image } from "astro:assets";
 import { formatDate } from "../lib/posts";
 import type { CollectionEntry } from "astro:content";
@@ -14,22 +15,32 @@ const { title, description, pubDate, tags, heroImage } = post.data;
 const href = `/blog/${post.id}`;
 ---
 
-<article class:list={["grid gap-4", heroImage && "sm:grid-cols-[10rem_1fr]"]}>
-  {heroImage && (
-    <a href={href} class="block overflow-hidden rounded-lg bg-surface0">
-      <Image src={heroImage} alt="" width={320} height={200} class="h-full w-full object-cover" />
+<article class="grid gap-6 sm:grid-cols-[3fr_5fr]">
+  {heroImage ? (
+    // self-start: without it, the grid row stretches this to match the text
+    // column's height, so a longer description made the image taller too.
+    // aspect-[4/3] keeps every thumbnail the same shape regardless of
+    // description length — taller than the detail page's 16:9-ish banner
+    // since this column is only about half the page width, not the full one.
+    <a href={href} class="block self-start overflow-hidden rounded-lg bg-surface0 shadow-lg">
+      <Image src={heroImage} alt="" width={336} height={252} class="aspect-[4/3] w-full object-cover" />
     </a>
+  ) : (
+    // Empty spacer, not the image column dropped: keeps the text column at
+    // the same width as image posts, so text wraps consistently across a
+    // page mixing image and non-image posts (e.g. Off Topics' sample posts).
+    <div class="hidden sm:block" aria-hidden="true" />
   )}
   <div>
-    <p class="text-xs text-subtext0">{formatDate(pubDate)}</p>
-    <h2 class="mt-1 text-lg font-semibold text-text">
+    <p class="text-sm text-subtext0">{formatDate(pubDate)}</p>
+    <h2 class="mt-1 text-xl lg:text-2xl font-semibold text-text">
       <a href={href} class="hover:text-accent">{title}</a>
     </h2>
-    <p class="mt-1 text-sm text-subtext0">{description}</p>
+    <p class="mt-1 text-justify text-subtext0 lg:text-lg">{description}</p>
     {tags.length > 0 && (
       <div class="mt-2 flex flex-wrap gap-2">
         {tags.map((tag) => (
-          <a href={`/tags/${tag}`} class="rounded-full bg-surface0 px-2.5 py-0.5 text-xs text-subtext1 hover:text-accent">
+          <a href={`/tags/${tag}`} class="rounded-full bg-crust dark:bg-surface0 px-2.5 py-0.5 text-sm text-subtext1 hover:text-accent">
             #{tag}
           </a>
         ))}

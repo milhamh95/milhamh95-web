@@ -1,0 +1,102 @@
+---
+interface Props {
+  category?: "tech" | "off-topic";
+  placeholder?: string;
+}
+
+const { category, placeholder = "Search all posts by title…" } = Astro.props;
+---
+
+<div class="mt-6" data-category={category}>
+  <input
+    type="search"
+    id="post-search"
+    placeholder={placeholder}
+    class="w-full rounded-md border border-surface0 bg-mantle px-3 py-2 text-text placeholder:text-subtext0 focus:border-accent focus:outline-none"
+    autocomplete="off"
+  />
+  <ul id="post-search-results" class="mt-8 flex flex-col gap-8" hidden></ul>
+  <p id="post-search-empty" class="mt-3 text-subtext0" hidden>No posts match.</p>
+</div>
+
+<script>
+  type SearchEntry = {
+    slug: string;
+    title: string;
+    description: string;
+    pubDate: string;
+    category: "tech" | "off-topic";
+    tags: string[];
+  };
+
+  const dateFormatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const input = document.getElementById("post-search") as HTMLInputElement;
+  const scopeCategory = input.closest<HTMLElement>("[data-category]")?.dataset.category as
+    | SearchEntry["category"]
+    | undefined;
+  const results = document.getElementById("post-search-results") as HTMLUListElement;
+  const empty = document.getElementById("post-search-empty") as HTMLParagraphElement;
+  const postList = document.getElementById("post-list") as HTMLDivElement;
+  const pagination = document.getElementById("pagination") as HTMLElement | null;
+
+  let index: SearchEntry[] | null = null;
+
+  async function loadIndex(): Promise<SearchEntry[]> {
+    if (!index) {
+      const res = await fetch("/search-index.json");
+      const all = (await res.json()) as SearchEntry[];
+      index = scopeCategory ? all.filter((post) => post.category === scopeCategory) : all;
+    }
+    return index;
+  }
+
+  input.addEventListener("input", async () => {
+    const query = input.value.trim().toLowerCase();
+
+    if (!query) {
+      results.hidden = true;
+      empty.hidden = true;
+      results.innerHTML = "";
+      postList.hidden = false;
+      pagination?.removeAttribute("hidden");
+      return;
+    }
+
+    postList.hidden = true;
+    pagination?.setAttribute("hidden", "");
+
+    const entries = await loadIndex();
+    const matches = entries.filter((post) => post.title.toLowerCase().includes(query));
+
+    results.innerHTML = matches
+      .map((post) => {
+        const href = `/blog/${post.slug}`;
+        const tags = post.tags
+          .map(
+            (tag) =>
+              `<a href="/tags/${tag}" class="rounded-full bg-crust dark:bg-surface0 px-2.5 py-0.5 text-sm text-subtext1 hover:text-accent">#${tag}</a>`,
+          )
+          .join("");
+
+        return `<li class="border-t border-surface0 pt-4 first:border-t-0 first:pt-0">
+          <article>
+            <p class="text-sm text-subtext0">${dateFormatter.format(new Date(post.pubDate))}</p>
+            <h2 class="mt-1 text-xl font-semibold text-text">
+              <a href="${href}" class="hover:text-accent">${post.title}</a>
+            </h2>
+            <p class="mt-1 text-justify text-subtext0">${post.description}</p>
+            ${tags ? `<div class="mt-2 flex flex-wrap gap-2">${tags}</div>` : ""}
+          </article>
+        </li>`;
+      })
+      .join("");
+
+    results.hidden = matches.length === 0;
+    empty.hidden = matches.length > 0;
+  });
+</script>

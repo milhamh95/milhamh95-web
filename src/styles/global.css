@@ -32,6 +32,11 @@
   --ctp-base: #eff1f5;
   --ctp-mantle: #e6e9ef;
   --ctp-crust: #dce0e8;
+  /* Plain --ctp-blue only hits 3.7:1 against --ctp-crust text at badge scale
+     (below WCAG AA's 4.5:1) — this is that same blue darkened until crust text
+     reads clearly. Mocha's blue already passes as-is, so no separate variant
+     needed there (see the .dark block below). */
+  --ctp-blue-strong: #1a57d0;
 }
 
 /* Catppuccin Mocha — https://catppuccin.com/palette/#flavor-mocha */
@@ -62,6 +67,7 @@
   --ctp-base: #1e1e2e;
   --ctp-mantle: #181825;
   --ctp-crust: #11111b;
+  --ctp-blue-strong: var(--ctp-blue); /* already reads fine against crust text here */
 }
 
 @theme {
@@ -78,6 +84,7 @@
   --color-sky: var(--ctp-sky);
   --color-sapphire: var(--ctp-sapphire);
   --color-blue: var(--ctp-blue);
+  --color-blue-strong: var(--ctp-blue-strong);
   --color-lavender: var(--ctp-lavender);
   --color-text: var(--ctp-text);
   --color-subtext1: var(--ctp-subtext1);
@@ -102,6 +109,23 @@ body {
   @apply bg-base text-text font-sans;
 }
 
+html {
+  scroll-behavior: smooth;
+  /* Reserves scrollbar space on every page, scrollable or not — otherwise a
+     page short enough to fit without scrolling has its centered content sit
+     a few pixels further right than a taller page next to it, most visible
+     in the header logo/nav shifting between pages. scrollbar-gutter is the
+     modern way to do this; overflow-y:scroll is the older fallback for
+     browsers that don't support scrollbar-gutter at all. */
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
+/* Offsets anchor-jump targets so the sticky header (h-[~64px]) doesn't cover them. */
+.prose :is(h2, h3, h4) {
+  scroll-margin-top: 5rem;
+}
+
 /* Prose (About page, blog posts) follows the same tokens, so no dark:prose-invert needed —
    --color-* already swaps with the .dark class. */
 .prose {
@@ -122,6 +146,58 @@ body {
   --tw-prose-td-borders: var(--color-surface0);
 }
 
+/* Typography's default table only draws horizontal rules; add the vertical
+   lines and a header background so it reads as a grid. */
+.prose table {
+  border: 1px solid var(--color-surface0);
+}
+
+.prose thead {
+  background-color: var(--color-surface0);
+}
+
+.prose thead th {
+  text-align: center;
+  /* surface1, not surface0: the header background is surface0, so a
+     surface0 border would blend in and the column lines would vanish. */
+  border-color: var(--color-surface1);
+}
+
+.prose :is(th, td) {
+  border: 1px solid var(--color-surface0);
+}
+
+/* Mermaid sets a background color for edge labels ("Yes"/"No" on arrows) but
+   never sets their text color, so it falls back to plain black in both
+   themes — unreadable against a dark-mode label background. */
+.prose .edgeLabel,
+.prose .edgeLabel p {
+  color: var(--color-text) !important;
+}
+
+.prose details {
+  border: 1px solid var(--color-surface1);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.prose details summary {
+  cursor: pointer;
+  font-size: 0.7em;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.prose details[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+/* hyphens: auto needs <html lang>; without it justified lines get wide word gaps. */
+.prose p {
+  text-align: justify;
+  hyphens: auto;
+}
+
 /* Shiki sets its own background-color as an inline style (always Mocha's base,
    #1e1e2e), which is identical to the page background in dark mode — the code
    block became invisible. Override with a fixed, always-Mocha crust background
@@ -131,6 +207,53 @@ body {
   background-color: #11111b !important; /* ctp-mocha crust */
   border: 1px solid #313244; /* ctp-mocha surface0 */
   border-radius: 0.5rem;
+}
+
+/* Mermaid diagrams aren't code — they recolor themselves for light/dark mode
+   (see Mermaid.astro), so the box around them must follow the mode too, not
+   stay fixed-Mocha like a real code block. --color-* already swaps with .dark. */
+.prose pre.mermaid {
+  background-color: var(--color-mantle) !important;
+  border-color: var(--color-surface0);
+  display: flex;
+  justify-content: center;
+}
+
+/* Optional header bar for a code block: ```ts title="src/utils/sheets.ts" — the
+   transformer in astro.config.mjs stamps data-title on the <pre>; data-language
+   is already there by default. Only appears when a title is given, so plain
+   code blocks are unaffected. Fixed Mocha, like the rest of the code block. */
+.prose pre[data-title] {
+  padding-top: 2.75rem;
+}
+
+.prose pre[data-title]::before {
+  content: attr(data-title);
+  position: absolute;
+  top: 0.6rem;
+  left: 1rem;
+  padding: 0.2rem 0.6rem;
+  background-color: #89b4fa; /* ctp-mocha blue */
+  border-radius: 0.375rem;
+  color: #11111b; /* ctp-mocha crust — dark text reads clearly on this light blue */
+  font-size: 0.8em;
+}
+
+.prose pre[data-title][data-language]::after {
+  content: attr(data-language);
+  position: absolute;
+  top: 0.6rem;
+  right: 3rem;
+  padding: 0.2rem 0.6rem;
+  background-color: #89b4fa; /* ctp-mocha blue */
+  border-radius: 999px;
+  color: #11111b; /* ctp-mocha crust */
+  font-size: 0.7em;
+  text-transform: lowercase;
+}
+
+.prose pre[data-title] .copy-code-button {
+  top: 0.45rem;
 }
 
 /* Injected by CodeCopyButtons.astro. Fixed Mocha colors, same reasoning as the

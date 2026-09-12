@@ -2,7 +2,9 @@
 title: "Hello, world"
 description: "The first post on this blog — how it's built."
 pubDate: 2026-09-11
+category: "tech"
 tags: ["astro", "meta"]
+heroImage: "./cover.png"
 ---
 
 This site is built with [Astro](https://astro.build), Tailwind CSS, and Markdown/MDX,

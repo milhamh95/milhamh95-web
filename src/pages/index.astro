@@ -1,22 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import PostListItem from "../components/PostListItem.astro";
-import { getPublishedPosts } from "../lib/posts";
-
-const posts = (await getPublishedPosts()).slice(0, 5);
+import NetworkBackground from "../components/NetworkBackground.astro";
 ---
 
 <Layout title="milhamh.com">
-  <section class="mx-auto max-w-2xl px-4 py-16">
-    <h1 class="text-2xl font-semibold text-text">Hi, I'm Muhammad Ilham Hidayat 👋</h1>
-    <p class="mt-3 text-subtext0">I write about software here.</p>
-
-    <div class="mt-10 flex flex-col gap-8">
-      {posts.map((post) => <PostListItem post={post} />)}
+  <section class="relative mx-auto flex w-full flex-1 min-h-[60vh] max-w-5xl flex-col justify-center overflow-hidden px-4 py-16">
+    <NetworkBackground />
+    <div class="relative z-10">
+      <h1 class="text-3xl font-semibold text-text">Hi, I'm Muhammad Ilham Hidayat 👋</h1>
+      <p class="mt-3 text-lg text-subtext0">I write about software here.</p>
     </div>
-
-    <a href="/blog" class="mt-8 inline-block text-accent underline underline-offset-4 hover:no-underline">
-      All posts &rarr;
-    </a>
   </section>
 </Layout>
