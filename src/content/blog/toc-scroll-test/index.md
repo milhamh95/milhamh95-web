@@ -2,7 +2,7 @@
 title: "TOC scroll test"
 description: "Dev-only long post to try out the table of contents sidebar."
 pubDate: 2026-09-12
-category: "tech"
+category: "dev-notes"
 tags: ["meta"]
 draft: true
 ---

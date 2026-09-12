@@ -2,7 +2,7 @@
 title: "Setting up Catppuccin light/dark mode in Astro + Tailwind"
 description: "How this site's color tokens are wired up so a single accent color change re-skins the whole thing."
 pubDate: 2026-09-12
-category: "tech"
+category: "dev-notes"
 tags: ["astro", "tailwind", "design"]
 heroImage: "./cover.png"
 ---

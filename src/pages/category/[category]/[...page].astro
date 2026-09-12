@@ -5,7 +5,7 @@ import PaginatedPostList from "../../../components/PaginatedPostList.astro";
 import PostSearch from "../../../components/PostSearch.astro";
 import { getPublishedPosts } from "../../../lib/posts";
 
-const LABELS = { tech: "Dev Notes", "off-topic": "Off Topics" } as const;
+const LABELS = { "dev-notes": "Dev Notes", "off-topic": "Off Topics" } as const;
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPublishedPosts();

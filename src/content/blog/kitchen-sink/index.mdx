@@ -2,12 +2,14 @@
 title: "Kitchen Sink"
 description: "Every Markdown/MDX element in one post, for checking default styles."
 pubDate: 2026-09-12
-category: "tech"
+category: "dev-notes"
 tags: ["sample"]
 draft: true
 ---
 
 import Callout from "../../../components/Callout.astro";
+import Figure from "../../../components/Figure.astro";
+import devNotesImage from "../../../assets/category-defaults/dev-notes.png";
 
 ## Headings
 
@@ -97,6 +99,14 @@ export async function menambahBarisBaru(spreadsheetId: string) {
 ## Image
 
 ![Cover placeholder](./cover.png)
+
+## Image with caption
+
+<Figure
+  src={devNotesImage}
+  alt="Dev Notes category default cover"
+  caption="Default cover image used for posts in the Dev Notes category."
+/>
 
 ## Horizontal rule
 

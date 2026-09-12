@@ -1,6 +1,6 @@
 ---
 interface Props {
-  category?: "tech" | "off-topic";
+  category?: "dev-notes" | "off-topic";
   placeholder?: string;
 }
 
@@ -25,11 +25,11 @@ const { category, placeholder = "Search all posts by title…" } = Astro.props;
     title: string;
     description: string;
     pubDate: string;
-    category: "tech" | "off-topic";
+    category: "dev-notes" | "off-topic";
     tags: string[];
   };
 
-  const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  const dateFormatter = new Intl.DateTimeFormat("en-GB", {
     year: "numeric",
     month: "long",
     day: "numeric",

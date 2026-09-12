@@ -1,0 +1,17 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+type Props = {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+};
+
+const { src, alt, caption } = Astro.props;
+---
+
+<figure class="my-6">
+  <Image src={src} alt={alt} class="rounded-md" />
+  {caption && <figcaption class="mt-2 text-center text-sm text-subtext0">{caption}</figcaption>}
+</figure>

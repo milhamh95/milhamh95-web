@@ -2,7 +2,11 @@
 import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
-import { formatDate } from "../../lib/posts";
+import { formatDate, getReadingTime } from "../../lib/posts";
+import techDefault from "../../assets/category-defaults/dev-notes.png";
+import offTopicDefault from "../../assets/category-defaults/off-topics.png";
+
+const CATEGORY_DEFAULTS = { "dev-notes": techDefault, "off-topic": offTopicDefault };
 
 export async function getStaticPaths() {
   // Drafts get a page in `npm run dev` (import.meta.env.DEV), so you can preview
@@ -20,7 +24,8 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { title, description, pubDate, updatedDate, tags, heroImage, draft } = post.data;
+const { title, description, pubDate, updatedDate, tags, heroImage, category, draft } = post.data;
+const image = heroImage ?? CATEGORY_DEFAULTS[category];
 const { Content, headings } = await render(post);
 // h2 only: h1 is the post title above, and h3+ makes scroll-highlighting ambiguous
 // when two subheadings sit close together.
@@ -35,10 +40,21 @@ const tocHeadings = headings.filter((h) => h.depth === 2);
         Draft &mdash; not published, dev preview only
       </p>
     )}
-    <p class="text-sm text-subtext0">
-      {formatDate(pubDate)}
-      {updatedDate && <span> &middot; updated {formatDate(updatedDate)}</span>}
-    </p>
+    <div class="flex flex-col gap-1 text-sm text-subtext0">
+      <span class="flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 shrink-0">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+        </svg>
+        {formatDate(pubDate)}
+        {updatedDate && <span>&middot; updated {formatDate(updatedDate)}</span>}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 shrink-0">
+          <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+        </svg>
+        {getReadingTime(post)}
+      </span>
+    </div>
     <h1 class="mt-1 text-4xl font-semibold text-text">{title}</h1>
 
     {tags.length > 0 && (
@@ -51,9 +67,12 @@ const tocHeadings = headings.filter((h) => h.depth === 2);
       </div>
     )}
 
-    {heroImage && (
-      <Image src={heroImage} alt="" width={896} height={480} class="mt-8 w-full rounded-lg object-cover" />
-    )}
+    {/* bg-[#313244] (ctp-mocha surface0), fixed regardless of site theme: the
+       category default PNGs have a transparent background designed for a
+       dark backdrop — see the matching comment in PostListItem.astro. */}
+    <div class="mt-8 overflow-hidden rounded-lg bg-[#313244]">
+      <Image src={image} alt="" width={896} height={480} loading="eager" class="w-full object-cover" />
+    </div>
 
     <div class="prose lg:prose-lg mt-8 max-w-none">
       <Content />

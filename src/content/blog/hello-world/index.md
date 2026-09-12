@@ -2,7 +2,7 @@
 title: "Hello, world"
 description: "The first post on this blog — how it's built."
 pubDate: 2026-09-11
-category: "tech"
+category: "dev-notes"
 tags: ["astro", "meta"]
 heroImage: "./cover.png"
 ---

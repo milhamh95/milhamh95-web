@@ -2,7 +2,7 @@
 title: "Draft example"
 description: "A work-in-progress post to prove the draft workflow."
 pubDate: 2026-09-20
-category: "tech"
+category: "dev-notes"
 tags: ["meta"]
 draft: true
 ---
