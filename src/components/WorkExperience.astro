@@ -1,0 +1,79 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import nimbusLabsLogo from "../assets/companies/nimbus-labs.jpg";
+
+type Experience = {
+  company: string;
+  role: string;
+  period: string;
+  location: string;
+  description: string;
+  skills: string[];
+  companyInfo: string;
+  logo?: ImageMetadata;
+};
+
+const EXPERIENCES: Experience[] = [
+  {
+    company: "Nimbus Labs",
+    role: "Senior Software Engineer",
+    period: "2023 — Present",
+    location: "Jakarta, Indonesia",
+    description: "Leading backend platform work for the payments team, focusing on reliability and API design.",
+    skills: ["Go", "PostgreSQL", "Kafka", "Kubernetes"],
+    companyInfo: "Nimbus Labs is a fintech startup (~120 people) building payment infrastructure for online merchants across Southeast Asia.",
+    logo: nimbusLabsLogo,
+  },
+  {
+    company: "Brightpath Tech",
+    role: "Software Engineer",
+    period: "2021 — 2023",
+    location: "Bandung, Indonesia",
+    description: "Built and maintained internal tooling and customer-facing dashboards for a logistics platform.",
+    skills: ["TypeScript", "React", "Node.js"],
+    companyInfo: "Brightpath Tech is a logistics SaaS company (~40 people) helping small couriers manage fleet routing and deliveries.",
+  },
+  {
+    company: "Kestrel Systems",
+    role: "Junior Software Engineer",
+    period: "2019 — 2021",
+    location: "Yogyakarta, Indonesia",
+    description: "Started my career shipping features for a small SaaS product, from frontend to database.",
+    skills: ["JavaScript", "PHP", "MySQL"],
+    companyInfo: "Kestrel Systems is a small SaaS studio (~15 people) building niche tools for independent accountants.",
+  },
+];
+---
+
+<div class="mt-8 flex flex-col">
+  {EXPERIENCES.map((exp, index) => (
+    <div class="flex">
+      <div class="mr-4 flex flex-col items-center">
+        <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-accent/40 bg-surface0 text-lg font-semibold text-accent">
+          {exp.logo ? (
+            <Image src={exp.logo} alt={`${exp.company} logo`} width={160} height={160} class="h-full w-full object-cover" />
+          ) : (
+            exp.company.charAt(0)
+          )}
+        </div>
+        {index !== EXPERIENCES.length - 1 && <div class="mt-2 w-px flex-1 bg-surface0" />}
+      </div>
+      <div class:list={["pt-2", index !== EXPERIENCES.length - 1 ? "pb-8" : ""]}>
+        <p class="text-lg font-semibold text-text">{exp.role}</p>
+        <p class="text-subtext0">{exp.company} · {exp.location}</p>
+        <p class="text-subtext0">{exp.period}</p>
+        <p class="mt-2 text-subtext0">{exp.description}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          {exp.skills.map((skill) => (
+            <span class="rounded-full bg-blue/10 px-2.5 py-0.5 text-sm text-blue-strong">{skill}</span>
+          ))}
+        </div>
+        <details class="mt-3">
+          <summary class="cursor-pointer text-sm text-accent">About the company</summary>
+          <p class="mt-2 text-subtext0">{exp.companyInfo}</p>
+        </details>
+      </div>
+    </div>
+  ))}
+</div>

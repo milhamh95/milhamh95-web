@@ -1,0 +1,261 @@
+{/* Simulates producing events into a Kafka topic with 8 partitions, comparing a
+   skewed partition key (country_code) against a well-distributed one (user_id).
+   Bar heights are relative to the tallest bar so far, so skew is visible as the
+   run progresses instead of only at the end. */}
+
+<div class="not-prose my-6 rounded-lg border border-surface1 bg-mantle overflow-hidden" data-kafka-partition>
+  <div class="flex flex-wrap items-center gap-3 border-b border-surface1 px-4 py-3">
+    <span class="text-xs font-mono uppercase tracking-wide text-subtext0">Partition Key</span>
+    <div class="flex gap-2">
+      <button type="button" data-kafka-key="country_code" class="kafka-key-btn rounded-md px-3 py-1.5 text-sm font-mono font-semibold">country_code</button>
+      <button type="button" data-kafka-key="user_id" class="kafka-key-btn rounded-md px-3 py-1.5 text-sm font-mono font-semibold">user_id</button>
+    </div>
+  </div>
+
+  <div class="p-4">
+    <p data-kafka-desc class="text-sm text-subtext0 mb-5"></p>
+
+    <div data-kafka-stage class="relative">
+      <div class="flex justify-center mb-6">
+        <span data-kafka-badge class="inline-flex items-center gap-2 rounded-full bg-crust px-3 py-1.5 text-xs font-mono">
+          <span class="uppercase text-subtext0">Producer</span>
+          <span data-kafka-status class="font-bold text-text">idle</span>
+        </span>
+      </div>
+
+      <div class="flex justify-center gap-3 mb-2" style="height: 160px; align-items: flex-end;">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            data-kafka-track
+            class="flex flex-col-reverse w-full bg-surface0 border border-surface2 rounded-t overflow-hidden"
+            style="width: 2.75rem; height: 160px;"
+          >
+            <div data-kafka-bar class="w-full bg-red/30 transition-[height,background-color] duration-200" style="height: 4px;" />
+          </div>
+        ))}
+      </div>
+
+      <div data-kafka-balls class="absolute inset-0 pointer-events-none"></div>
+    </div>
+    <div class="flex justify-center gap-3 mb-6">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div data-kafka-label class="flex flex-col items-center gap-0.5 rounded px-1 py-0.5 transition-colors duration-200" style="width: 2.75rem;">
+          <span class="text-xs font-mono text-subtext0">P{i}</span>
+          <span data-kafka-count class="text-xs font-mono text-text">0</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="flex justify-between border-t border-surface1 pt-3 text-sm gap-2">
+      <div>
+        <span class="block text-xs text-subtext0">PRODUCED</span>
+        <span class="font-mono text-text"><span data-kafka-produced>0</span> / <span data-kafka-total>80</span></span>
+      </div>
+      <div>
+        <span class="block text-xs text-subtext0">HOTTEST</span>
+        <span data-kafka-hottest class="font-mono text-text">—</span>
+      </div>
+      <div class="text-right">
+        <span class="block text-xs text-subtext0">VERDICT</span>
+        <span data-kafka-verdict class="italic text-text">—</span>
+      </div>
+    </div>
+
+    <div class="flex gap-2 mt-4">
+      <button type="button" data-kafka-play class="px-3 py-1.5 rounded-md text-sm font-medium bg-blue text-base hover:opacity-90 disabled:opacity-50">Play</button>
+      <button type="button" data-kafka-reset class="px-3 py-1.5 rounded-md text-sm font-medium border border-surface2 text-text hover:bg-surface0">Reset</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .kafka-key-btn {
+    background-color: var(--ctp-surface0);
+    color: var(--ctp-text);
+  }
+  .kafka-key-btn[data-active="true"] {
+    background-color: var(--ctp-text);
+    color: var(--ctp-base);
+  }
+</style>
+
+<script>
+  type KeyConfig = { description: string; weights: number[] };
+
+  const PARTITIONS = 8;
+  const TOTAL_EVENTS = 80;
+  const TICK_MS = 80;
+  const BALL_MS = 260;
+
+  const KEY_CONFIGS: Record<string, KeyConfig> = {
+    country_code: {
+      description: "Partition key is country_code. 70% of your traffic comes from one country, so 70% of events hash into one partition.",
+      weights: [0.7, ...Array(PARTITIONS - 1).fill(0.3 / (PARTITIONS - 1))],
+    },
+    user_id: {
+      description: "Partition key is user_id. IDs hash roughly uniformly, so events spread evenly across all partitions.",
+      weights: Array(PARTITIONS).fill(1 / PARTITIONS),
+    },
+  };
+
+  function pickPartition(weights: number[]): number {
+    const r = Math.random();
+    let cumulative = 0;
+    for (let i = 0; i < weights.length; i++) {
+      cumulative += weights[i];
+      if (r <= cumulative) return i;
+    }
+    return weights.length - 1;
+  }
+
+  function initKafkaPartition(root: HTMLElement) {
+    const keyBtns = root.querySelectorAll<HTMLButtonElement>("[data-kafka-key]");
+    const descEl = root.querySelector<HTMLElement>("[data-kafka-desc]")!;
+    const statusEl = root.querySelector<HTMLElement>("[data-kafka-status]")!;
+    const bars = root.querySelectorAll<HTMLElement>("[data-kafka-bar]");
+    const tracks = root.querySelectorAll<HTMLElement>("[data-kafka-track]");
+    const labels = root.querySelectorAll<HTMLElement>("[data-kafka-label]");
+    const countEls = root.querySelectorAll<HTMLElement>("[data-kafka-count]");
+    const producedEl = root.querySelector<HTMLElement>("[data-kafka-produced]")!;
+    const hottestEl = root.querySelector<HTMLElement>("[data-kafka-hottest]")!;
+    const verdictEl = root.querySelector<HTMLElement>("[data-kafka-verdict]")!;
+    const playBtn = root.querySelector<HTMLButtonElement>("[data-kafka-play]")!;
+    const resetBtn = root.querySelector<HTMLButtonElement>("[data-kafka-reset]")!;
+    const stage = root.querySelector<HTMLElement>("[data-kafka-stage]")!;
+    const badge = root.querySelector<HTMLElement>("[data-kafka-badge]")!;
+    const ballLayer = root.querySelector<HTMLElement>("[data-kafka-balls]")!;
+
+    let activeKey = "country_code";
+    let counts = Array(PARTITIONS).fill(0);
+    let produced = 0;
+    let intervalId = 0;
+    let runId = 0;
+
+    function spawnBall(idx: number, onLand: () => void) {
+      const thisRun = runId;
+      const stageRect = stage.getBoundingClientRect();
+      const badgeRect = badge.getBoundingClientRect();
+      const trackRect = tracks[idx].getBoundingClientRect();
+
+      const startX = badgeRect.left + badgeRect.width / 2 - stageRect.left;
+      const startY = badgeRect.bottom - stageRect.top;
+      const endX = trackRect.left + trackRect.width / 2 - stageRect.left;
+      const endY = trackRect.top - stageRect.top;
+
+      const ball = document.createElement("div");
+      ball.className = "absolute top-0 left-0 size-2.5 rounded-full bg-red";
+      ball.style.transform = `translate(${startX - 5}px, ${startY - 5}px)`;
+      ball.style.transition = `transform ${BALL_MS}ms ease-in`;
+      ballLayer.appendChild(ball);
+
+      requestAnimationFrame(() => {
+        ball.style.transform = `translate(${endX - 5}px, ${endY - 5}px)`;
+      });
+
+      setTimeout(() => {
+        ball.remove();
+        if (thisRun === runId) onLand();
+      }, BALL_MS);
+    }
+
+    function setActiveKey(key: string) {
+      activeKey = key;
+      keyBtns.forEach((btn) => btn.setAttribute("data-active", String(btn.dataset.kafkaKey === key)));
+      descEl.textContent = KEY_CONFIGS[key].description;
+    }
+
+    function render() {
+      const maxCount = Math.max(...counts, 1);
+      const hottestIdx = produced > 0 ? counts.indexOf(maxCount) : -1;
+
+      counts.forEach((count, i) => {
+        bars[i].style.height = `${Math.max(4, (count / maxCount) * 160)}px`;
+        countEls[i].textContent = String(count);
+
+        const isHottest = i === hottestIdx;
+        bars[i].classList.toggle("bg-red", isHottest);
+        bars[i].classList.toggle("bg-red/30", !isHottest);
+        labels[i].classList.toggle("bg-red/15", isHottest);
+        labels[i].classList.toggle("text-red", isHottest);
+      });
+      producedEl.textContent = String(produced);
+
+      if (produced === 0) {
+        hottestEl.textContent = "—";
+      } else {
+        const pct = Math.round((maxCount / produced) * 100);
+        hottestEl.textContent = `P${hottestIdx} (${pct}%)`;
+      }
+    }
+
+    function finish() {
+      clearInterval(intervalId);
+      statusEl.textContent = "done";
+      playBtn.disabled = false;
+      playBtn.textContent = "Play";
+
+      const maxCount = Math.max(...counts);
+      const pct = maxCount / produced;
+      verdictEl.textContent = pct > 0.35 ? "hot partition" : "well balanced";
+    }
+
+    function play() {
+      runId++;
+      ballLayer.innerHTML = "";
+      counts = Array(PARTITIONS).fill(0);
+      produced = 0;
+      render();
+
+      playBtn.disabled = true;
+      playBtn.textContent = "Playing…";
+      statusEl.textContent = "streaming…";
+      verdictEl.textContent = "streaming…";
+
+      const weights = KEY_CONFIGS[activeKey].weights;
+      let spawned = 0;
+      intervalId = window.setInterval(() => {
+        if (spawned >= TOTAL_EVENTS) {
+          clearInterval(intervalId);
+          return;
+        }
+        spawned++;
+        const idx = pickPartition(weights);
+        spawnBall(idx, () => {
+          counts[idx]++;
+          produced++;
+          render();
+          if (produced >= TOTAL_EVENTS) finish();
+        });
+      }, TICK_MS);
+    }
+
+    function reset() {
+      runId++;
+      clearInterval(intervalId);
+      ballLayer.innerHTML = "";
+      counts = Array(PARTITIONS).fill(0);
+      produced = 0;
+      render();
+      statusEl.textContent = "idle";
+      verdictEl.textContent = "—";
+      playBtn.disabled = false;
+      playBtn.textContent = "Play";
+    }
+
+    keyBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (playBtn.disabled) return;
+        reset();
+        setActiveKey(btn.dataset.kafkaKey!);
+      });
+    });
+
+    playBtn.addEventListener("click", play);
+    resetBtn.addEventListener("click", reset);
+
+    setActiveKey(activeKey);
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-kafka-partition]").forEach(initKafkaPartition);
+</script>

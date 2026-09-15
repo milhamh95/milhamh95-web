@@ -19,8 +19,20 @@ system — read DESIGN.md before touching any styling.
 - `src/components/` — `Header`, `Footer`, `ThemeToggle`, `PostListItem`. Structure/markup was
   adapted from `reference/astrowind/` (gitignored, MIT-licensed template, reference only —
   never import from it).
+- Interactive post diagrams (e.g. `KafkaPartitionKeyMotion.tsx`) use React + framer motion via
+  `@astrojs/react`, hydrated with `client:load` in the post's `.mdx`. Prefer this over vanilla
+  JS/CSS for anything with timed, sequenced, or physics-based animation (state machines with
+  multiple in-flight async pieces) — see `KafkaPartitionKey.astro` vs `KafkaPartitionKeyMotion.tsx`
+  for why: framer motion's `onAnimationComplete` avoids manual race-condition guards (stale
+  timers/intervals firing after a reset) that the vanilla version needs by hand. Static,
+  non-interactive markup stays plain `.astro` — don't reach for React by default.
 - `src/pages/open-graph/[...slug].ts` — generates the per-post share image; add a post and its
   OG image is generated automatically, nothing to wire up.
+- Drafts (`draft: true`): visible by direct URL in `npm run dev` only (`src/pages/blog/[slug].astro`
+  checks `import.meta.env.DEV`), and listed in the nav's dev-only "Drafts" link →
+  `src/pages/drafts/[...path].astro`. `getPublishedPosts()` always filters drafts out, even in
+  dev — so a draft never appears in the homepage/blog list/tags, only via that Drafts page or a
+  direct URL. Both 404 in production automatically.
 
 ## Conventions
 
@@ -34,6 +46,7 @@ system — read DESIGN.md before touching any styling.
 
 - Don't wire up analytics, comments, search, or a second language — explicitly deferred, see
   plan.md.
-- Don't add a UI framework (React/Vue/etc.) for a static blog.
+- Don't reach for React outside of interactive diagrams/animations (see above) — everything
+  else (layout, content, static UI) stays plain `.astro` components.
 - Don't use `text-base` for 16px. The Catppuccin `base` token turns it into the background
   color, so text vanishes. 16px is the default — just omit the size class.

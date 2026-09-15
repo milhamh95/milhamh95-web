@@ -9,7 +9,22 @@ draft: true
 
 import Callout from "../../../components/Callout.astro";
 import Figure from "../../../components/Figure.astro";
+import ApiFlowAnimation from "../../../components/ApiFlowAnimation.astro";
+import KafkaPartitionKey from "../../../components/KafkaPartitionKey.astro";
+import KafkaPartitionKeyMotion from "../../../components/KafkaPartitionKeyMotion.tsx";
 import devNotesImage from "../../../assets/category-defaults/dev-notes.png";
+
+## API flow animation
+
+<ApiFlowAnimation />
+
+## Kafka partition key animation (vanilla JS)
+
+<KafkaPartitionKey />
+
+## Kafka partition key animation (framer motion)
+
+<KafkaPartitionKeyMotion client:load />
 
 ## Headings
 

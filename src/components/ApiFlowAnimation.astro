@@ -1,0 +1,120 @@
+{/* Client -> Backend -> DB request/response flow, animated by moving a dot
+   along SVG paths. Each <ApiFlowAnimation> instance is scoped by a unique id
+   so multiple diagrams can live on one page without JS colliding between them. */}
+
+<div class="not-prose my-6 rounded-lg border border-surface1 bg-mantle p-4" data-api-flow>
+  <svg viewBox="0 0 600 180" class="w-full h-auto" role="img" aria-label="API request flow animation">
+    <path id="path-req" d="M 90 90 H 240" stroke="var(--ctp-surface2)" stroke-width="2" fill="none" />
+    <path id="path-query" d="M 360 90 H 510" stroke="var(--ctp-surface2)" stroke-width="2" fill="none" />
+
+    <g>
+      <rect x="20" y="60" width="140" height="60" rx="8" class="fill-surface0 stroke-blue" stroke-width="2" />
+      <text x="90" y="95" text-anchor="middle" class="fill-text text-[14px] font-medium">Client</text>
+    </g>
+    <g>
+      <rect x="240" y="60" width="120" height="60" rx="8" class="fill-surface0 stroke-green" stroke-width="2" />
+      <text x="300" y="95" text-anchor="middle" class="fill-text text-[14px] font-medium">Backend</text>
+    </g>
+    <g>
+      <rect x="510" y="60" width="70" height="60" rx="8" class="fill-surface0 stroke-peach" stroke-width="2" />
+      <text x="545" y="95" text-anchor="middle" class="fill-text text-[14px] font-medium">DB</text>
+    </g>
+
+    <text data-af-label x="300" y="35" text-anchor="middle" class="fill-subtext0 text-[13px]"></text>
+    <circle data-af-dot r="6" class="fill-blue" cx="90" cy="90" style="display: none;" />
+  </svg>
+
+  <div class="mt-3 flex gap-2">
+    <button type="button" data-af-play class="px-3 py-1.5 rounded-md text-sm font-medium bg-blue text-base hover:opacity-90">Play</button>
+    <button type="button" data-af-restart class="px-3 py-1.5 rounded-md text-sm font-medium border border-surface2 text-text hover:bg-surface0">Restart</button>
+  </div>
+</div>
+
+<script>
+  type Stage = { fromX: number; toX: number; y: number; label: string; durationMs: number };
+
+  const STAGES: Stage[] = [
+    { fromX: 90, toX: 300, y: 90, label: "GET /users", durationMs: 900 },
+    { fromX: 300, toX: 545, y: 90, label: "SELECT * FROM users", durationMs: 900 },
+    { fromX: 545, toX: 300, y: 90, label: "rows", durationMs: 900 },
+    { fromX: 300, toX: 90, y: 90, label: "200 OK", durationMs: 900 },
+  ];
+  const TOTAL_MS = STAGES.reduce((sum, s) => sum + s.durationMs, 0);
+
+  function initApiFlow(root: HTMLElement) {
+    const dot = root.querySelector<SVGCircleElement>("[data-af-dot]")!;
+    const label = root.querySelector<SVGTextElement>("[data-af-label]")!;
+    const playBtn = root.querySelector<HTMLButtonElement>("[data-af-play]")!;
+    const restartBtn = root.querySelector<HTMLButtonElement>("[data-af-restart]")!;
+
+    let elapsed = 0;
+    let playing = false;
+    let rafId = 0;
+    let lastFrameTime = 0;
+
+    function stageAt(ms: number): { stage: Stage; progress: number } {
+      let remaining = ms;
+      for (const stage of STAGES) {
+        if (remaining <= stage.durationMs) return { stage, progress: remaining / stage.durationMs };
+        remaining -= stage.durationMs;
+      }
+      const last = STAGES[STAGES.length - 1];
+      return { stage: last, progress: 1 };
+    }
+
+    function render() {
+      if (elapsed <= 0) {
+        dot.style.display = "none";
+        label.textContent = "";
+        return;
+      }
+      const { stage, progress } = stageAt(Math.min(elapsed, TOTAL_MS));
+      const x = stage.fromX + (stage.toX - stage.fromX) * progress;
+      dot.style.display = "";
+      dot.setAttribute("cx", String(x));
+      dot.setAttribute("cy", String(stage.y));
+      label.textContent = stage.label;
+    }
+
+    function tick(now: number) {
+      const delta = now - lastFrameTime;
+      lastFrameTime = now;
+      elapsed = Math.min(elapsed + delta, TOTAL_MS);
+      render();
+
+      if (elapsed >= TOTAL_MS) {
+        playing = false;
+        playBtn.textContent = "Play";
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function play() {
+      if (playing) return;
+      if (elapsed >= TOTAL_MS) elapsed = 0;
+      playing = true;
+      playBtn.textContent = "Pause";
+      lastFrameTime = performance.now();
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function pause() {
+      playing = false;
+      playBtn.textContent = "Play";
+      cancelAnimationFrame(rafId);
+    }
+
+    playBtn.addEventListener("click", () => (playing ? pause() : play()));
+    restartBtn.addEventListener("click", () => {
+      cancelAnimationFrame(rafId);
+      elapsed = 0;
+      render();
+      play();
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-api-flow]").forEach(initApiFlow);
+</script>

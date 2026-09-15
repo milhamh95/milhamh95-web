@@ -7,6 +7,8 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { visit } from 'unist-util-visit';
 
+import react from '@astrojs/react';
+
 // Pulls ```mermaid fences out of the normal code path before Shiki sees them
 // (Shiki has no "mermaid" grammar and would error) and turns them into a
 // <pre class="mermaid"> holding the raw diagram source. Mermaid.astro renders
@@ -44,7 +46,7 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  integrations: [mdx(), sitemap()],
+  integrations: [mdx(), sitemap(), react()],
 
   markdown: {
     remarkPlugins: [remarkMermaid],
